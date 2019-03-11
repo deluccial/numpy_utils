@@ -21,9 +21,9 @@ def __r_name(op):
 class _Infix(np.ndarray):
     """
     Base Infix class for numpy arrays.
-    Possible combinations are:
-        |op|, &op&, *op*, <<op>>, +op+, -op-, %op%, ^op^, @op@
-    http://code.activestate.com/recipes/577201-infix-operators-for-numpy-arrays/
+    Possible combinations are: |op|
+    Based on stack overflow post:
+        http://code.activestate.com/recipes/577201-infix-operators-for-numpy-arrays/
     """
     def __new__(cls, function):
         obj = np.ndarray.__new__(cls, 0)
@@ -44,51 +44,51 @@ class _Infix(np.ndarray):
         return self.function(other)
 
 
-ops = ['or']    # only use OR, but can extend to use any operations
-d = {**{__l_name(op): _Infix.left for op in ops}, **{__r_name(op): _Infix.right for op in ops}}  # define op functions
-[setattr(_Infix, op, d[op]) for op in d]  # set Infix's ops to the corresponding functions we defined above
+__ops = ['or']    # only use OR, but can extend to use any operations
+__d = {**{__l_name(op): _Infix.left for op in __ops}, **{__r_name(op): _Infix.right for op in __ops}}  # define op functions
+[setattr(_Infix, op, __d[op]) for op in __d]  # set Infix's ops to the corresponding functions we defined above
 
 
 # ----------------------------------- Sub-Utilities to Create the Main Utilities -----------------------------------
 
 
 @singledispatch
-def _hconcat(*_) -> np.ndarray: pass
+def __hconcat(*_) -> np.ndarray: pass
 
 
 @singledispatch
-def _vconcat(*_) -> np.ndarray: pass
+def __vconcat(*_) -> np.ndarray: pass
 
 
-@_hconcat.register(int)
-def _hconcat_scalar_back(x, y) -> np.ndarray: return np.hstack((np.ones((y.shape[0], 1)) * x, y))
+@__hconcat.register(int)
+def __hconcat_scalar_back(x, y) -> np.ndarray: return np.hstack((np.ones((y.shape[0], 1)) * x, y))
 
 
-@_hconcat.register(np.ndarray)
-def _hconcat_scalar_front(x, y) -> np.ndarray: return np.hstack((x, np.ones((x.shape[0], 1))*y))
+@__hconcat.register(np.ndarray)
+def __hconcat_scalar_front(x, y) -> np.ndarray: return np.hstack((x, np.ones((x.shape[0], 1)) * y))
 
 
-@_vconcat.register(int)
-def _vconcat_scalar_top(x, y) -> np.ndarray: return np.vstack((np.ones((1, y.shape[0]))*x, y))
+@__vconcat.register(int)
+def __vconcat_scalar_top(x, y) -> np.ndarray: return np.vstack((np.ones((1, y.shape[0])) * x, y))
 
 
-@_vconcat.register(np.ndarray)
-def _vconcat_scalar_bottom(x, y) -> np.ndarray: return np.vstack((x, np.ones((1, x.shape[0]))*y))
+@__vconcat.register(np.ndarray)
+def __vconcat_scalar_bottom(x, y) -> np.ndarray: return np.vstack((x, np.ones((1, x.shape[0])) * y))
 
 
 @singledispatch
-def _add_dim(*_) -> np.ndarray: pass
+def __add_dim(*_) -> np.ndarray: pass
 
 
-@_add_dim.register(int)
-def _add_dim_int(axis, x) -> np.ndarray: return np.expand_dims(x, axis=axis)
+@__add_dim.register(int)
+def __add_dim_int(axis, x) -> np.ndarray: return np.expand_dims(x, axis=axis)
 
 
-@_add_dim.register(tuple)
-def _add_dim_tuple(axes, x) -> np.ndarray:
+@__add_dim.register(tuple)
+def __add_dim_tuple(axes, x) -> np.ndarray:
     x_ = x.copy()
     for axis in axes:
-        x_ = _add_dim_int(axis, x_)
+        x_ = __add_dim_int(axis, x_)
     return x_
 
 
@@ -101,7 +101,7 @@ def hcat(x: Union[int, np.ndarray], y: Union[int, np.ndarray]) -> np.ndarray:
     Horizontal concatenation of np.ndarrays or np.ndarrays and scalars.
     Usage: array |hcat| 1, 1 |hcat| array, or array |hcat| array
     """
-    return _hconcat(x, y) if not (isinstance(x, np.ndarray) and isinstance(y, np.ndarray)) else np.hstack((x, y))
+    return __hconcat(x, y) if not (isinstance(x, np.ndarray) and isinstance(y, np.ndarray)) else np.hstack((x, y))
 
 
 @_Infix
@@ -110,7 +110,7 @@ def vcat(x: Union[int, np.ndarray], y: Union[int, np.ndarray]) -> np.ndarray:
     Vertical concatenation of np.ndarrays or np.ndarrays and scalars.
     Usage: array |vcat| 1, 1 |vcat| array, or array |vcat| array
     """
-    return _vconcat(x, y) if not (isinstance(x, np.ndarray) and isinstance(y, np.ndarray)) else np.vstack((x, y))
+    return __vconcat(x, y) if not (isinstance(x, np.ndarray) and isinstance(y, np.ndarray)) else np.vstack((x, y))
 
 
 @_Infix
@@ -119,7 +119,7 @@ def add_dim(x: np.ndarray, axis: Union[int, tuple]) -> np.ndarray:
     Adds a dimension to x along axis. Sequentially adds dimensions if axis is tuple.
     Usage: array |add_dim| -1, array |add_dim| (0, 0, -1)
     """
-    return _add_dim(axis, x)
+    return __add_dim(axis, x)
 
 
 @_Infix
@@ -151,34 +151,3 @@ def make_array(x: list, shape: tuple, **kwargs):
     Makes an array with values x and reshapes to shape.
     """
     return np.array(x, **kwargs).reshape(shape)
-
-
-if __name__ == '__main__':
-    split = '\n------------------------------'
-
-    a = np.array([[1, 1],
-                  [-1, 0]])
-    print('hcat: \n', a |hcat| 6, split)
-    print('hcat: \n', 3 |hcat| a, split)
-    print('vcat: \n', a |vcat| 5, split)
-    print('vcat: \n', 7 |vcat| a, split)
-    print('hcat: \n', a |hcat| a, split)
-    print('vcat: \n', a |vcat| a, split)
-    print('vcat: \n', a |vcat| a, split)
-    print('hcat: \n', a |hcat| 9 |hcat| a, split)
-    print('vcat: \n', a |vcat| 9 |vcat| a, split)
-
-    print('add_dim: \n', (a |add_dim| -1).shape, split)
-    print('add_dim: \n', (a |add_dim| (0, 0, -1)).shape, split)
-
-    print('to_type: \n', (a |to_type| np.float), split)
-    print('to_type: \n', (list(a) |to_type| np.uint8), split)
-
-    print('equals: \n', (a |equals| a), split)
-    print('equals: \n', (a |equals| list(a)), split)
-    print('equals: \n', (tuple(a) |equals| list(a)), split)
-
-    print('make_constant: \n', make_constant(1, (3, 1)), split)
-
-    print('make_array: \n', make_array([1, 2, 3], (1, 3)), split)
-    print('make_array: \n', make_array([1, 2, 3], (3, 1)), split)
