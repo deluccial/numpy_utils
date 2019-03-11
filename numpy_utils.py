@@ -132,21 +132,28 @@ def to_type(x: Union[np.ndarray, list], dtype: np.dtype) -> np.ndarray:
 
 
 @_Infix
-def equals(x: Union[np.ndarray, list, tuple], y: Union[np.ndarray, list, tuple]) -> np.ndarray:
+def eq(x: Union[np.ndarray, list, tuple], y: Union[np.ndarray, list, tuple]) -> bool:
     """
     Determines whether (x == y).all(). If x or y is a list or tuple, we convert to numpy arrays.
     """
     return np.equal(np.array(x), np.array(y)).all()
 
 
-def make_constant(value: float, shape: tuple, **kwargs):
+def equals(x: Union[np.ndarray, list, tuple], y: Union[np.ndarray, list, tuple]) -> bool:
+    """
+    Functional equivalent to eq without infix.
+    """
+    return np.equal(np.array(x), np.array(y)).all()
+
+
+def make_constant(value: float, shape: tuple, **kwargs) -> np.ndarray:
     """
     Makes an array of the given shape filled with the given value.
     """
     return np.ones(shape, **kwargs) * value
 
 
-def make_array(x: list, shape: tuple, **kwargs):
+def make_array(x: list, shape: tuple, **kwargs) -> np.ndarray:
     """
     Makes an array with values x and reshapes to shape.
     """
