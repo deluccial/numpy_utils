@@ -14,7 +14,7 @@ setuptools.setup(
 
     author_email="deluccial@gmail.com",
 
-    description="Infix NumPy utilities.",
+    description="NumPy utilities.",
 
     long_description=long_description,
 
@@ -23,6 +23,8 @@ setuptools.setup(
     py_modules=['numpy_utils'],
 
     packages=setuptools.find_packages(),
+
+    url="https://github.com/deluccial/numpy_utils.git",
 
     install_requires=[
 
