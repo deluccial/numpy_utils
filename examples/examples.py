@@ -1,5 +1,5 @@
 import numpy as np
-from numpy_utils import hcat, vcat, add_dim, to_type, equals, make_array, make_constant
+from numpy_utils import hcat, vcat, add_dim, to_type, eq, make_array, make_constant
 
 split = '\n------------------------------'
 
@@ -35,9 +35,9 @@ print('to_type float: \n', (arr | to_type | np.float), split)
 print('to_type uint8: \n', (list(arr) | to_type | np.uint8), split)
 
 # test equality between arrays, lists, tuples
-print('equals array=array: \n', (arr | equals | arr), split)
-print('equals array=list: \n', (arr | equals | list(arr)), split)
-print('equals tuple=list: \n', (tuple(arr) | equals | list(arr)), split)
+print('equals array=array: \n', (arr | eq | arr), split)
+print('equals array=list: \n', (arr | eq | list(arr)), split)
+print('equals tuple=list: \n', (tuple(arr) | eq | list(arr)), split)
 
 # make constant array with shape
 print('make_constant: \n', make_constant(1, (3, 1)), split)
