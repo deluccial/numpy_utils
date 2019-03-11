@@ -21,6 +21,7 @@ class Test:
         assert (arr | eq | list(arr))
         assert (arr | eq | list(arr))
         assert (tuple(arr) | eq | list(arr))
+        assert equals(arr, arr)
 
     def test_hcat(self, arr, arr_alt):
         assert ((arr | hcat | 6) | eq | np.array([[1., 1., 6.], [-1., 0., 6.]]))
