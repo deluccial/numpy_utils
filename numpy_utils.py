@@ -153,7 +153,7 @@ def make_constant(value: float, shape: tuple, **kwargs) -> np.ndarray:
     return np.ones(shape, **kwargs) * value
 
 
-def make_array(x: list, shape: tuple, **kwargs) -> np.ndarray:
+def make_array(x: Union[np.ndarray, list, tuple], shape: tuple, **kwargs) -> np.ndarray:
     """
     Makes an array with values x and reshapes to shape.
     """
