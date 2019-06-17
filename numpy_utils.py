@@ -1,5 +1,5 @@
-from functools import singledispatch
 from typing import Union
+import numbers
 import numpy as np
 
 # ------------------------------------------- Base Infix Class Creation -------------------------------------------
@@ -52,51 +52,41 @@ __d = {**{__l_name(op): _Infix.left for op in __ops}, **{__r_name(op): _Infix.ri
 # ----------------------------------- Sub-Utilities to Create the Main Utilities -----------------------------------
 
 
-@singledispatch
-def __hconcat(*_) -> np.ndarray: pass
+def __hconcat(x, y) -> np.ndarray:
+    if isinstance(x, np.ndarray) and isinstance(y, numbers.Number):
+        return np.hstack((x, np.ones((x.shape[0], 1)) * y))
+    elif isinstance(x, numbers.Number) and isinstance(y, np.ndarray):
+        return np.hstack((np.ones((y.shape[0], 1)) * x, y))
+    else:
+        raise ValueError("Possible argument types are either a number or np.ndarray. Got {}".format(type(x)))
 
 
-@singledispatch
-def __vconcat(*_) -> np.ndarray: pass
+def __vconcat(x, y) -> np.ndarray:
+    if isinstance(x, np.ndarray) and isinstance(y, numbers.Number):
+        return np.vstack((x, np.ones((1, x.shape[0])) * y))
+    elif isinstance(x, numbers.Number) and isinstance(y, np.ndarray):
+        return np.vstack((np.ones((1, y.shape[0])) * x, y))
+    else:
+        raise ValueError("Possible argument types are either a number or np.ndarray. Got {}".format(type(x)))
 
 
-@__hconcat.register(int)
-def __hconcat_scalar_back(x, y) -> np.ndarray: return np.hstack((np.ones((y.shape[0], 1)) * x, y))
-
-
-@__hconcat.register(np.ndarray)
-def __hconcat_scalar_front(x, y) -> np.ndarray: return np.hstack((x, np.ones((x.shape[0], 1)) * y))
-
-
-@__vconcat.register(int)
-def __vconcat_scalar_top(x, y) -> np.ndarray: return np.vstack((np.ones((1, y.shape[0])) * x, y))
-
-
-@__vconcat.register(np.ndarray)
-def __vconcat_scalar_bottom(x, y) -> np.ndarray: return np.vstack((x, np.ones((1, x.shape[0])) * y))
-
-
-@singledispatch
-def __add_dim(*_) -> np.ndarray: pass
-
-
-@__add_dim.register(int)
-def __add_dim_int(axis, x) -> np.ndarray: return np.expand_dims(x, axis=axis)
-
-
-@__add_dim.register(tuple)
-def __add_dim_tuple(axes, x) -> np.ndarray:
-    x_ = x.copy()
-    for axis in axes:
-        x_ = __add_dim_int(axis, x_)
-    return x_
+def __add_dim(axis, x) -> np.ndarray:
+    if isinstance(axis, int):
+        return np.expand_dims(x, axis=axis)
+    elif isinstance(axis, tuple):
+        x_ = x.copy()
+        for ax in axis:
+            x_ = __add_dim(ax, x_)
+        return x_
+    else:
+        raise ValueError("Possible argument types are either int or tuple. Got {}".format(type(axis)))
 
 
 # ---------------------------------------------- Main Utilities ----------------------------------------------
 
 
 @_Infix
-def hcat(x: Union[int, np.ndarray], y: Union[int, np.ndarray]) -> np.ndarray:
+def hcat(x: Union[numbers.Number, np.ndarray], y: Union[numbers.Number, np.ndarray]) -> np.ndarray:
     """
     Horizontal concatenation of np.ndarrays or np.ndarrays and scalars.
     Usage: array |hcat| 1, 1 |hcat| array, or array |hcat| array
@@ -105,7 +95,7 @@ def hcat(x: Union[int, np.ndarray], y: Union[int, np.ndarray]) -> np.ndarray:
 
 
 @_Infix
-def vcat(x: Union[int, np.ndarray], y: Union[int, np.ndarray]) -> np.ndarray:
+def vcat(x: Union[numbers.Number, np.ndarray], y: Union[numbers.Number, np.ndarray]) -> np.ndarray:
     """
     Vertical concatenation of np.ndarrays or np.ndarrays and scalars.
     Usage: array |vcat| 1, 1 |vcat| array, or array |vcat| array
@@ -123,7 +113,7 @@ def add_dim(x: np.ndarray, axis: Union[int, tuple]) -> np.ndarray:
 
 
 @_Infix
-def to_type(x: Union[np.ndarray, list], dtype: np.dtype) -> np.ndarray:
+def to_type(x: Union[np.ndarray, list, tuple], dtype: np.dtype) -> np.ndarray:
     """
     Converts x to given dtype if x is an array. If x is a list, will convert x to array and then convert to dtype.
     Usage: array |to_type| np.int, list |to_type| np.float

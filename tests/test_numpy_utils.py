@@ -25,7 +25,9 @@ class Test:
 
     def test_hcat(self, arr, arr_alt):
         assert ((arr | hcat | 6) | eq | np.array([[1., 1., 6.], [-1., 0., 6.]]))
+        assert ((arr | hcat | 6.) | eq | np.array([[1., 1., 6.], [-1., 0., 6.]]))
         assert ((3 | hcat | arr) | eq | np.array([[3., 1., 1.], [3., -1., 0.]]))
+        assert ((3. | hcat | arr) | eq | np.array([[3., 1., 1.], [3., -1., 0.]]))
 
         assert ((arr | hcat | arr) | eq | np.array([[1., 1., 1., 1.], [-1., 0., -1., 0]]))
         assert ((arr | hcat | 9 | hcat | arr) | eq | np.array([[1., 1., 9., 1., 1.], [-1., 0., 9., -1., 0]]))
@@ -33,15 +35,25 @@ class Test:
         with pytest.raises(ValueError):
             (arr | hcat | arr_alt)
 
+        with pytest.raises(ValueError):
+            (arr | hcat | "foo")
+            ("foo" | hcat | arr)
+
     def test_vcat(self, arr, arr_alt):
         assert ((arr | vcat | 6) | eq | np.array([[1., 1.], [-1., 0.], [6., 6.]]))
+        assert ((arr | vcat | 6.) | eq | np.array([[1., 1.], [-1., 0.], [6., 6.]]))
         assert ((3 | vcat | arr) | eq | np.array([[3., 3.], [1., 1.], [-1., 0.]]))
+        assert ((3. | vcat | arr) | eq | np.array([[3., 3.], [1., 1.], [-1., 0.]]))
 
         assert ((arr | vcat | arr) | eq | np.array([[1., 1.], [-1., 0.], [1., 1.], [-1., 0.]]))
         assert ((arr | vcat | 9 | vcat | arr) | eq | np.array([[1., 1.], [-1., 0.], [9., 9.], [1., 1.], [-1., 0.]]))
 
         with pytest.raises(ValueError):
             (arr | vcat | arr_alt)
+
+        with pytest.raises(ValueError):
+            (arr | vcat | "foo")
+            ("foo" | vcat | arr)
 
     def test_add_dim(self, arr):
         assert (arr | add_dim | -1).shape == (2, 2, 1)
