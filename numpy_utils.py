@@ -1,8 +1,8 @@
-from typing import Union
 import numbers
+from typing import Union
 import numpy as np
 
-# ------------------------------------------- Base Infix Class Creation -------------------------------------------
+# ------------------------------------ Base Infix Class Creation -----------------------------------
 
 
 def __l_name(op):
@@ -45,11 +45,16 @@ class _Infix(np.ndarray):
 
 
 __ops = ['or']    # only use OR, but can extend to use any operations
-__d = {**{__l_name(op): _Infix.left for op in __ops}, **{__r_name(op): _Infix.right for op in __ops}}  # define op functions
-[setattr(_Infix, op, __d[op]) for op in __d]  # set Infix's ops to the corresponding functions we defined above
+# define op functions
+__d = {
+    **{__l_name(op): _Infix.left for op in __ops},
+    **{__r_name(op): _Infix.right for op in __ops}
+}
+# set Infix's ops to the corresponding functions we defined above
+[setattr(_Infix, op, __d[op]) for op in __d]
 
 
-# ----------------------------------- Sub-Utilities to Create the Main Utilities -----------------------------------
+# ---------------------------- Sub-Utilities to Create the Main Utilities --------------------------
 
 
 def __hconcat(x, y) -> np.ndarray:
@@ -58,7 +63,8 @@ def __hconcat(x, y) -> np.ndarray:
     elif isinstance(x, numbers.Number) and isinstance(y, np.ndarray):
         return np.hstack((np.ones((y.shape[0], 1)) * x, y))
     else:
-        raise ValueError("Possible argument types are either a number or np.ndarray. Got {}".format(type(x)))
+        raise ValueError("Possible argument types are either a number or np.ndarray. "
+                         "Got {}".format(type(x)))
 
 
 def __vconcat(x, y) -> np.ndarray:
@@ -67,7 +73,8 @@ def __vconcat(x, y) -> np.ndarray:
     elif isinstance(x, numbers.Number) and isinstance(y, np.ndarray):
         return np.vstack((np.ones((1, y.shape[0])) * x, y))
     else:
-        raise ValueError("Possible argument types are either a number or np.ndarray. Got {}".format(type(x)))
+        raise ValueError("Possible argument types are either a number or np.ndarray. "
+                         "Got {}".format(type(x)))
 
 
 def __add_dim(axis, x) -> np.ndarray:
@@ -79,10 +86,11 @@ def __add_dim(axis, x) -> np.ndarray:
             x_ = __add_dim(ax, x_)
         return x_
     else:
-        raise ValueError("Possible argument types are either int or tuple. Got {}".format(type(axis)))
+        raise ValueError("Possible argument types are either int or tuple. "
+                         "Got {}".format(type(axis)))
 
 
-# ---------------------------------------------- Main Utilities ----------------------------------------------
+# ---------------------------------------- Main Utilities ------------------------------------------
 
 
 @_Infix
@@ -91,7 +99,9 @@ def hcat(x: Union[numbers.Number, np.ndarray], y: Union[numbers.Number, np.ndarr
     Horizontal concatenation of np.ndarrays or np.ndarrays and scalars.
     Usage: array |hcat| 1, 1 |hcat| array, or array |hcat| array
     """
-    return __hconcat(x, y) if not (isinstance(x, np.ndarray) and isinstance(y, np.ndarray)) else np.hstack((x, y))
+    return __hconcat(x, y) \
+        if not (isinstance(x, np.ndarray) and isinstance(y, np.ndarray)) \
+        else np.hstack((x, y))
 
 
 @_Infix
@@ -100,7 +110,9 @@ def vcat(x: Union[numbers.Number, np.ndarray], y: Union[numbers.Number, np.ndarr
     Vertical concatenation of np.ndarrays or np.ndarrays and scalars.
     Usage: array |vcat| 1, 1 |vcat| array, or array |vcat| array
     """
-    return __vconcat(x, y) if not (isinstance(x, np.ndarray) and isinstance(y, np.ndarray)) else np.vstack((x, y))
+    return __vconcat(x, y) \
+        if not (isinstance(x, np.ndarray) and isinstance(y, np.ndarray)) \
+        else np.vstack((x, y))
 
 
 @_Infix
@@ -115,7 +127,8 @@ def add_dim(x: np.ndarray, axis: Union[int, tuple]) -> np.ndarray:
 @_Infix
 def to_type(x: Union[np.ndarray, list, tuple], dtype: np.dtype) -> np.ndarray:
     """
-    Converts x to given dtype if x is an array. If x is a list, will convert x to array and then convert to dtype.
+    Converts x to given dtype if x is an array. If x is a list, will convert x to array and then
+    convert to dtype.
     Usage: array |to_type| np.int, list |to_type| np.float
     """
     return x.astype(dtype) if isinstance(x, np.ndarray) else np.array(x).astype(dtype)
