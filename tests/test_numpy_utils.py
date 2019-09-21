@@ -1,16 +1,7 @@
 import pytest
+import numpy as np
 
-from numpy_utils import *
-
-
-@pytest.fixture
-def arr() -> np.ndarray:
-    return np.array([[1, 1], [-1, 0]])
-
-
-@pytest.fixture
-def arr_alt() -> np.ndarray:
-    return np.array([[1, 1, 1], [-1, 0, 0], [1, 1, 1]])
+from numpy_utils import eq, equals, hcat, vcat, add_dim, to_type, make_constant, make_array
 
 
 @pytest.mark.incremental
@@ -30,7 +21,8 @@ class Test:
         assert ((3. | hcat | arr) | eq | np.array([[3., 1., 1.], [3., -1., 0.]]))
 
         assert ((arr | hcat | arr) | eq | np.array([[1., 1., 1., 1.], [-1., 0., -1., 0]]))
-        assert ((arr | hcat | 9 | hcat | arr) | eq | np.array([[1., 1., 9., 1., 1.], [-1., 0., 9., -1., 0]]))
+        assert ((arr | hcat | 9 | hcat | arr) | eq | np.array([[1., 1., 9., 1., 1.],
+                                                               [-1., 0., 9., -1., 0]]))
 
         with pytest.raises(ValueError):
             (arr | hcat | arr_alt)
@@ -46,7 +38,11 @@ class Test:
         assert ((3. | vcat | arr) | eq | np.array([[3., 3.], [1., 1.], [-1., 0.]]))
 
         assert ((arr | vcat | arr) | eq | np.array([[1., 1.], [-1., 0.], [1., 1.], [-1., 0.]]))
-        assert ((arr | vcat | 9 | vcat | arr) | eq | np.array([[1., 1.], [-1., 0.], [9., 9.], [1., 1.], [-1., 0.]]))
+        assert ((arr | vcat | 9 | vcat | arr) | eq | np.array([[1., 1.],
+                                                               [-1., 0.],
+                                                               [9., 9.],
+                                                               [1., 1.],
+                                                               [-1., 0.]]))
 
         with pytest.raises(ValueError):
             (arr | vcat | arr_alt)
