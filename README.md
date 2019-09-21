@@ -5,6 +5,6 @@
 [![](https://img.shields.io/github/last-commit/deluccial/numpy_utils.svg?style=flat-square)](https://github.com/deluccial/numpy_utils/commits)
 [![](https://img.shields.io/github/languages/code-size/deluccial/numpy_utils.svg?style=flat-square)](https://github.com/deluccial/numpy_utils)
 
-Provides general NumPy utilities for the modern-day programmer.
+Provides some NumPy utilities as additional functions and [infix](http://tomerfiliba.com/blog/Infix-Operators/) operators.
 
-`pip install numpy_utils`
+`pip3 install numpy_utils`
